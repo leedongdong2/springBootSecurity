@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel ="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<link rel ="stylesheet" href="/css/home.css">
+</head>
+<body>
+	<div>
+		<span class="title">입력하기</span>
+	</div>
+	<div class="insertContainel">
+		<form th:action="@{/main/produce-page/1}" method="post" id="insertForm">
+			<div>
+				<label>날짜 : 											
+					<input type="date" pattern="\d{4}-\d{2}-\d{2}" name="accountDate" id="insertAccountDate" readonly/>			
+				</label>
+			</div>
+			<div>
+				<label>항목 : 
+					<input type="text" name="accountItem"/>
+				</label>	
+			</div>
+			<div>
+				<label>적요 :
+					<input type="text" name="accountBriefs"/>
+				</label>
+			</div>
+			<div>
+				<label>수입 : 
+					<input type="text" name="accountIncome"/>원
+				</label>
+			</div>
+			<div>
+				<label>지출 : 
+					<input type="text" name="accountExpenditure"/>원
+				</label>
+			</div>
+			<div>
+				<label>비고 :
+					<input type="text" name="accountNote"/>
+				</label>
+			</div>
+			<div class="insertButton">
+				<button th:text="입력" type="button" id="addButton" class="btn btn-primary" ></button>
+			</div>	
+		</form>
+	</div>
+<script type="text/javascript" src="/js/event.js"></script>
+</body>
+</html>

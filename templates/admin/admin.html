@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+<link rel ="stylesheet" href="/css/home.css">
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+ 	<div>
+ 		<div class="adminTitle">관리자 페이지</div>
+ 		
+ 		<div class="adminMenuTitle">
+ 			<span>이름</span>
+ 			<span>생성일시</span>
+ 		</div>
+ 		
+ 		<div th:each="users : ${users}" class="adminMenu"> 		
+ 			<span th:text="${users.userId}"></span>
+ 			<span th:text="${users.appendDate}"></span>
+ 		</div>
+ 		
+		<div class="adminButtonContainer">					
+			<th:block th:if="${usersPage.startPage > 1}">
+					<button id="adminFirstPageButton" th:text="<<" th:value="1"></button>
+					<button id="adminPreviousButton" th:text="이전" th:value="${usersPage.nowPage-1}"></button>
+			</th:block>
+			
+			
+			<th:block th:each="adminPageButton : ${#numbers.sequence(usersPage.startPage,usersPage.endPage)}">
+				<button class="adminPageButton" th:text="${adminPageButton}" th:value="${adminPageButton}" ></button>
+			</th:block>
+			
+			<th:block th:if="${usersPage.endPage < usersPage.totPage}">
+					<button id="adminLastPageButton" th:text=">>" th:value="${usersPage.totPage}"></button>
+					<button id="adminNextButton" th:text="다음" th:value="${usersPage.nowPage+1}"></button>			
+			</th:block>
+	    </div>
+
+ 		
+ 		<div class="totUsers">
+ 			이용자 수 : [[${usersPage.totList}]]명
+ 		</div>
+ 		<div>
+ 			<form th:action="@{/admin/admin}" th:method="get" id="adminForm">
+ 				<input Type="hidden" name="nowPage" id="adminNowPaeg" value="1"/>
+ 			</form>
+ 		</div>
+ 	</div>
+ <script type="text/javascript" src="/js/home.js"></script>	
+</body>
+</html>

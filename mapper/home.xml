@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.springBootTest.mapper.HomeMapper">
+	
+	<!-- 가계부 입력 -->
+	<insert id="insertAccount" parameterType="com.example.springBootTest.vo.AccountVo">
+		INSERT 
+			INTO 
+				ACCOUNT_BOOK
+					(  	ACCOUNT_NO,
+						USER_ID,
+						ACCOUNT_DATE,
+						ACCOUNT_ITEM,
+						ACCOUNT_BRIEFS,
+						ACCOUNT_INCOME,
+						ACCOUNT_EXPENDITURE,
+						ACCOUNT_BALANCE,
+						ACCOUNT_NOTE,
+						INSERT_DATE,
+						UPDATE_DATE
+					) 
+			VALUES 
+					(	
+						ACCOUNT_SEQ.NEXTVAL,
+						#{userId},
+						#{accountDate},
+						#{accountItem},
+						#{accountBriefs},
+						#{accountIncome},
+						#{accountExpenditure},
+						#{accountBalance},
+						#{accountNote},
+						SYSDATE,
+						SYSDATE
+					)
+	</insert>
+	
+	<!-- 남은 잔액을 조회 -->
+	<select id="searchRecentryBalance" parameterType="String" resultType="Integer" >
+		SELECT 	
+			ACCOUNT_BALANCE 
+				FROM
+					(
+						SELECT 
+							USER_ID,
+							ACCOUNT_BALANCE,
+							ROW_NUMBER() OVER(PARTITION by USER_ID ORDER by UPDATE_DATE desc) RN
+						FROM 
+							ACCOUNT_BOOK 
+						WHERE 
+							USER_ID = #{_parameter}
+					) WHERE RN = 1
+	</select>
+	
+	<!-- 로그인시 당일 가계부 정보를 조회 -->
+	<select id="searchHomeAccount" parameterType="com.example.springBootTest.page.Page" resultType="com.example.springBootTest.vo.AccountVo">
+		SELECT 
+			RN,
+			ACCOUNT_NO,
+			ACCOUNT_DATE,
+			ACCOUNT_ITEM,
+			ACCOUNT_BRIEFS,
+			ACCOUNT_INCOME,
+			ACCOUNT_EXPENDITURE,
+			ACCOUNT_BALANCE,
+			ACCOUNT_NOTE
+		FROM 	
+			(	
+				SELECT 
+					ROWNUM RN,
+					A.ACCOUNT_NO,
+					A.ACCOUNT_DATE,
+					A.ACCOUNT_ITEM,
+					A.ACCOUNT_BRIEFS,
+					A.ACCOUNT_INCOME,
+					A.ACCOUNT_EXPENDITURE,
+					A.ACCOUNT_BALANCE,
+					A.ACCOUNT_NOTE
+				FROM
+					(
+						SELECT
+							ACCOUNT_NO, 
+							ACCOUNT_DATE,
+							ACCOUNT_ITEM,
+							ACCOUNT_BRIEFS,
+							ACCOUNT_INCOME,
+							ACCOUNT_EXPENDITURE,
+							ACCOUNT_BALANCE,
+							ACCOUNT_NOTE   
+						FROM 
+							ACCOUNT_BOOK
+						WHERE
+							USER_ID = #{userId}
+							AND
+							ACCOUNT_DATE = #{accountDate}
+						ORDER BY 
+							UPDATE_DATE
+					)A
+			) WHERE RN BETWEEN #{startNo} AND #{endNo} 
+	</select>
+	
+	<!--  -->
+	<select id="searchHomeAccountCount" parameterType="com.example.springBootTest.page.Page" resultType="int">
+		SELECT 
+			COUNT(USER_ID) 	
+		FROM 
+			ACCOUNT_BOOK
+		WHERE
+			USER_ID = #{userId}
+			AND
+			ACCOUNT_DATE = #{accountDate}
+		ORDER BY 
+			UPDATE_DATE
+	</select>
+	
+	<!--로그인시 당일 가계부 총수입 총지출 조회  -->
+	<select id="totalAccount" parameterType="com.example.springBootTest.page.Page" resultType="com.example.springBootTest.configuration.ParamMap">
+		SELECT 		
+			SUM(ACCOUNT_INCOME) TOTAL_ACCOUNT_INCOME,
+			SUM(ACCOUNT_EXPENDITURE) TOTAL_ACCOUNT_EXPENDITURE
+		FROM 
+			ACCOUNT_BOOK
+		WHERE
+			USER_ID = #{userId}
+			AND
+			ACCOUNT_DATE = #{accountDate}
+	</select>
+	
+	<!-- 가계부 검색 조회 -->
+	<select id="findAccountBookList" parameterType="com.example.springBootTest.page.Page" resultType="com.example.springBootTest.vo.AccountVo">
+		SELECT 
+			RN,
+			ACCOUNT_NO,
+			ACCOUNT_DATE,
+			ACCOUNT_ITEM,
+			ACCOUNT_BRIEFS,
+			ACCOUNT_INCOME,
+			ACCOUNT_EXPENDITURE,
+			ACCOUNT_BALANCE,
+			ACCOUNT_NOTE
+		FROM 	
+			(	
+				SELECT
+					ACCOUNT_NO, 
+					ROWNUM RN,
+					B.ACCOUNT_DATE,
+					B.ACCOUNT_ITEM,
+					B.ACCOUNT_BRIEFS,
+					B.ACCOUNT_INCOME,
+					B.ACCOUNT_EXPENDITURE,
+					B.ACCOUNT_BALANCE,
+					B.ACCOUNT_NOTE
+				FROM
+					(
+						SELECT
+							A.ACCOUNT_NO, 
+							A.ACCOUNT_DATE,
+							A.ACCOUNT_ITEM,
+							A.ACCOUNT_BRIEFS,
+							A.ACCOUNT_INCOME,
+							A.ACCOUNT_EXPENDITURE,
+							A.ACCOUNT_BALANCE,
+							A.ACCOUNT_NOTE
+						FROM
+							(
+								SELECT
+									ACCOUNT_NO, 
+									ACCOUNT_DATE,
+									ACCOUNT_ITEM,
+									ACCOUNT_BRIEFS,
+									ACCOUNT_INCOME,
+									ACCOUNT_EXPENDITURE,
+									ACCOUNT_BALANCE,
+									ACCOUNT_NOTE,
+									INSERT_DATE   
+								FROM 
+									ACCOUNT_BOOK
+								WHERE
+									USER_ID = #{userId}
+								AND 
+									ACCOUNT_DATE
+								BETWEEN  
+									TO_DATE(#{accountStartDate},'YYYY-MM-DD') 
+								AND
+							 		TO_DATE(#{accountEndDate},'YYYY-MM-DD')
+							 )A
+						 WHERE 
+							<if test='accountDivision != null'>			
+								<if test='"none".equals(accountDivision)'>
+										ACCOUNT_ITEM LIKE '%${accountFindStr}%'  
+									OR
+										ACCOUNT_BRIEFS LIKE '%${accountFindStr}%' 
+									OR 
+										ACCOUNT_NOTE LIKE '%${accountFindStr}%'
+								</if>
+								<if test='"accountItem".equals(accountDivision)'>
+										ACCOUNT_ITEM LIKE '%${accountFindStr}%'
+								</if>
+								<if test='"accountBriefs".equals(accountDivision)'>
+										ACCOUNT_BRIEFS LIKE '%${accountFindStr}%'
+								</if>
+								<if test='"accountNote".equals(accountDivision)'>
+										ACCOUNT_NOTE LIKE '%${accountFindStr}%'
+								</if>
+							</if>	
+						ORDER BY 
+							INSERT_DATE
+					)B
+			) WHERE RN BETWEEN #{startNo} AND #{endNo}
+	</select>
+	
+	<select id="findAccountBookListCount" parameterType="com.example.springBootTest.page.Page" resultType="int">
+				
+				SELECT
+					COUNT(ACCOUNT_NO)
+				FROM 
+					(
+							SELECT
+								ACCOUNT_NO, 
+								ACCOUNT_DATE,
+								ACCOUNT_ITEM,
+								ACCOUNT_BRIEFS,
+								ACCOUNT_INCOME,
+								ACCOUNT_EXPENDITURE,
+								ACCOUNT_BALANCE,
+								ACCOUNT_NOTE,
+								INSERT_DATE   
+							FROM 
+								ACCOUNT_BOOK
+							WHERE
+								USER_ID = #{userId}
+							AND 
+								ACCOUNT_DATE
+							BETWEEN  
+								TO_DATE(#{accountStartDate},'YYYY-MM-DD') 
+							AND
+								TO_DATE(#{accountEndDate},'YYYY-MM-DD')
+					  )
+			  WHERE 	
+			  		<if test='accountDivision != null'>			
+						<if test='"none".equals(accountDivision)'>
+								ACCOUNT_ITEM LIKE '%${accountFindStr}%'  
+							OR
+								ACCOUNT_BRIEFS LIKE '%${accountFindStr}%' 
+							OR 
+								ACCOUNT_NOTE LIKE '%${accountFindStr}%'
+						</if>
+						<if test='"accountItem".equals(accountDivision)'>
+								ACCOUNT_ITEM LIKE '%${accountFindStr}%'
+						</if>
+						<if test='"accountBriefs".equals(accountDivision)'>
+								ACCOUNT_BRIEFS LIKE '%${accountFindStr}%'
+						</if>
+						<if test='"accountNote".equals(accountDivision)'>
+								ACCOUNT_NOTE LIKE '%${accountFindStr}%'
+						</if>
+					</if>
+				ORDER BY 
+					INSERT_DATE
+	</select>
+	
+	<!-- 검색된 가계부 총수입 총지출 조회 -->
+	<select id="findTotalAccount" parameterType="com.example.springBootTest.page.Page" resultType="com.example.springBootTest.configuration.ParamMap">
+		
+		SELECT 
+			SUM(ACCOUNT_INCOME) TOTAL_ACCOUNT_INCOME,
+			SUM(ACCOUNT_EXPENDITURE) TOTAL_ACCOUNT_EXPENDITURE
+		FROM 
+			(
+				SELECT 		
+					ACCOUNT_INCOME,
+					ACCOUNT_EXPENDITURE,
+					ACCOUNT_ITEM,
+					ACCOUNT_BRIEFS,
+					ACCOUNT_NOTE 
+				FROM 
+					ACCOUNT_BOOK
+				WHERE
+					USER_ID = 'hhhhr'
+				AND
+					ACCOUNT_DATE
+				BETWEEN  
+					TO_DATE(#{accountStartDate},'YYYY-MM-DD') 
+				AND
+					TO_DATE(#{accountEndDate},'YYYY-MM-DD')	
+			) 
+		WHERE
+		<if test='accountDivision != null'>			
+			<if test='"none".equals(accountDivision)'>
+					ACCOUNT_ITEM LIKE '%${accountFindStr}%'  
+				OR
+					ACCOUNT_BRIEFS LIKE '%${accountFindStr}%' 
+				OR
+					ACCOUNT_NOTE LIKE '%${accountFindStr}%'
+			</if>
+			<if test='"accountItem".equals(accountDivision)'>
+					ACCOUNT_ITEM LIKE '%${accountFindStr}%'
+			</if>
+			<if test='"accountBriefs".equals(accountDivision)'>
+					ACCOUNT_BRIEFS LIKE '%${accountFindStr}%'
+			</if>
+			<if test='"accountNote".equals(accountDivision)'>
+					ACCOUNT_NOTE LIKE '%${accountFindStr}%'
+			</if>
+		</if>
+		
+	</select>
+	
+	<!-- 가계부 단건 디테일 조회 -->
+	<select id="findDetailAccount" parameterType="String" resultType="com.example.springBootTest.vo.AccountVo" >
+		
+		SELECT
+			 ACCOUNT_NO,
+			 ACCOUNT_DATE,
+			 ACCOUNT_ITEM,
+			 ACCOUNT_BRIEFS,
+			 ACCOUNT_INCOME,
+			 ACCOUNT_EXPENDITURE,
+			 ACCOUNT_BALANCE,
+			 ACCOUNT_NOTE 
+		 FROM 
+		 	ACCOUNT_BOOK 
+	 	WHERE 
+	 		ACCOUNT_NO  = #{_parameter} 
+	
+	</select>
+	
+	<!-- 가계부 단건 수정 -->
+	<update id="modifyAccountDetail" parameterType="com.example.springBootTest.vo.AccountVo">
+		UPDATE 
+			ACCOUNT_BOOK 
+		SET 
+			ACCOUNT_ITEM =  #{accountItem},
+			ACCOUNT_BRIEFS = #{accountBriefs},
+			ACCOUNT_INCOME = #{accountChangeIncome},
+			ACCOUNT_EXPENDITURE = #{accountChangeExpenditure},
+			ACCOUNT_NOTE = #{accountNote},
+			ACCOUNT_BALANCE = #{accountBalance},
+			UPDATE_DATE = SYSDATE
+		WHERE 
+			ACCOUNT_NO = #{accountNo}
+	</update>
+	
+	<!-- 가계부 수정 후 남은 잔액 변경(수정 가계 이후의 가계 남은 잔액도 변경 ) -->
+	<update id="modifyAccountBalance" parameterType="com.example.springBootTest.vo.AccountVo">
+	
+		UPDATE 
+			ACCOUNT_BOOK 
+		SET 
+			ACCOUNT_BALANCE  = ACCOUNT_BALANCE + #{changedValue},
+			UPDATE_DATE = SYSDATE
+		WHERE 
+			INSERT_DATE > (SELECT INSERT_DATE
+	  						FROM ACCOUNT_BOOK ab2
+	  						WHERE ACCOUNT_NO = #{accountNo}
+	  												)		
+	</update>	
+	
+	<!-- 가계부 단건 삭제 -->
+	<delete id="deleteAccountDetail" parameterType="com.example.springBootTest.vo.AccountVo">
+	
+		DELETE 	
+		FROM 
+			ACCOUNT_BOOK 
+		WHERE 
+			ACCOUNT_NO = #{accountNo}
+		
+	</delete>
+	
+	<!-- 관리자 페이지 유저 id 조회 -->
+	<select id="findUser" parameterType="com.example.springBootTest.page.Page" resultType="com.example.springBootTest.configuration.ParamMap">
+		 SELECT
+			RN,
+ 			USER_ID,
+ 			APPEND_DATE 
+ 		FROM
+ 		(
+			SELECT
+				ROWNUM RN,
+				USER_ID,
+				APPEND_DATE 
+			FROM 
+				(
+					SELECT 
+						USER_ID,
+						APPEND_DATE 
+					FROM 
+						TB_USER 
+					WHERE 
+						USER_AUTH = 'USER' 
+					ORDER BY 
+						APPEND_DATE DESC
+			   )A 
+		) WHERE RN BETWEEN #{startNo} AND #{endNo}
+	</select>
+	
+	<!-- 관리자 페이지 유저 수 조회 -->
+	<select id="findUserCount" resultType="int">
+		SELECT 
+			COUNT(USER_NO) 
+		FROM 
+			TB_USER tu 
+		WHERE 
+			USER_AUTH = 'USER'
+	</select>
+	
+</mapper>

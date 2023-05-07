@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<!--회원가입 페이지-->
+<!-- Latest compiled and minified CSS -->
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+</head>
+<body>
+<form method="post" action="/user/signUp" id="joinForm">
+	<input type="hidden" id="checkIdYn" value="n">
+    <div class="container">
+        <h1>회원가입</h1>
+        <div class="form-group">
+            <label for="inputEmail4">userId</label>
+            <input type="text" class="form-control" id="inputEmail4" name="userId" placeholder="사용자 아이디" >
+        </div>
+        <button type="button" class="btn btn-primary" id="checkId" th:text="중복확인"></button>
+        <div class="form-group">
+            <label for="inputAddress">userName</label>
+            <input type="text" class="form-control" id="inputAddress" name="userName" placeholder="사용자 이름">
+        </div>
+        <div class="form-group">
+            <label for="inputPassword4">password</label>
+            <input type="password" class="form-control" id="inputPassword4" name="userPw" placeholder="사용자 비밀번호">
+        </div>
+        <div class="form-group">
+        	<label for="inputStartIncome">현재 잔액을 입력해주세요</label>
+            <input type="text" class="form-control" id="inputStartIncome" name="startIncome" placeholder="시작금액 : 숫자만 입력">
+        </div>
+        <button type="button" class="btn btn-primary" id="joinButton">가입 완료</button>
+    </div>
+</form>
+<script>
+const joinButton = document.querySelector("#joinButton");
+const checkIdYn = document.querySelector("#checkIdYn");
+const joinForm = document.querySelector("#joinForm");
+const checkId = document.querySelector("#checkId");
+const inputEmail4 = document.querySelector("#inputEmail4");
+const inputAddress = document.querySelector("#inputAddress");
+const inputPassword4 = document.querySelector("#inputPassword4");
+const inputStartIncome = document.querySelector("#inputStartIncome"); 
+
+
+joinButton.addEventListener("click",function(){
+	let checkBlank = "n";
+	
+		if(inputEmail4.value == "") {
+			alert("아이디를 입력해주세요.");
+			inputEmail4.focus();
+		} else if(inputAddress.value == "") {
+			alert("이름을 입력해주세요.")
+			inputAddress.focus();
+		} else if(inputPassword4.value == "") {
+			alert("비밀번호를 입력해주세요.")
+			inputPassword4.focus();
+		} else if(inputStartIncome.value == ""){
+			alert("현재 잔액을 입력해주세요.")
+			inputStartIncome.focus();
+		}
+		
+		if(inputEmail4.value != "" && inputAddress.value != "" && inputPassword4.value != "" && inputStartIncome != "") {
+			checkBlank = "y";
+		}
+			
+		if(checkIdYn.value=="n") {
+			alert("아이디 중복확인을 해주세요")
+		} else if( checkIdYn.value=="y" && checkBlank == "y") {
+			joinForm.submit();
+		}
+
+
+});
+
+checkId.addEventListener("click",function(){
+	
+	const regExp = /^[a-z]+[a-z0-9]{5,19}$/g;
+	
+	if( regExp.test(inputEmail4.value) ){ 
+		
+		const xhr = new XMLHttpRequest();
+		
+		xhr.open("GET","/user/signUp/1?id="+inputEmail4.value,true);
+		xhr.responseType="json"
+		
+		xhr.send();
+		
+		xhr.onload = function() {
+			if (xhr.status == 200){
+				const result = xhr.response;
+				
+				if(result.checkResult == "0") {
+					alert("사용가능한 아이디입니다.");	
+					checkIdYn.value="y";
+				} else if(result.checkResult == "1") {
+					alert("사용불가능한 아이디입니다.")
+				}
+			} else {
+				
+			}
+		}
+	} else {
+		alert("아이디는 영문자숫자포함 6~20자여야합니다");
+	}
+});
+
+</script>
+</body>
+</html>

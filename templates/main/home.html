@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+<link rel ="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<link rel ="stylesheet" href="/css/home.css">
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<div class="containel">
+		<div>
+			<form th:action=@{/user/signUp/2} th:method="delete" id="deleteIdForm">
+				<input type="hidden" name="id" th:value="${accountPage.userId}">
+			</form>
+			<span class="welcomeTitle">
+				<ul>
+					<li class="welcomeUser" id="welcomeUser">[[${accountPage.userId}]]님 환영합니다.</li>
+					<li class="deactivate">탈퇴하기</li>
+				</ul>
+			</span>
+			<span class="title">가계부</span>
+		</div>
+		<!-- 가계부 메인 -->
+			<div class="searchBar">
+				<form th:action=@{/main/home/1} method="get" id="searchForm">
+				<input type="hidden" name="nowPage" id="nowPage" value="1"/>
+				<span class="searchBarMenu"><label>시작날짜 : <input type="date" pattern="\d{4}-\d{2}-\d{2}" name="accountStartDate" th:value="${findAccountStartDate}"></label></span>
+				<span class="searchBarMenu"><label>종료날짜 : <input type="date" pattern="\d{4}-\d{2}-\d{2}" name="accountEndDate" th:value="${findAccountEndDate}"></label></span>
+				<span class="searchBarMenu"><label>구분 :
+						<select name="accountDivision">
+							<option value="none" th:selected="${accountPage.accountDivision} == 'none'">==선택==</option>
+							<option value="accountItem" th:selected="${accountPage.accountDivision} == 'accountItem'">항목</option>
+							<option value="accountBriefs" th:selected="${accountPage.accountDivision} == 'accountBriefs'">적요</option>
+							<option value="accountNote" th:selected="${accountPage.accountDivision} == 'accountNote'">비고</option>
+						</select>
+					  </label>
+			  	</span>
+			  	<span><input type="text" name="accountFindStr" th:value="${accountPage.accountFindStr}"/></span>
+				<button th:text="조회" class="btn btn-primary"></button>
+				</form>
+			</div>
+			<div>	
+				<div class="menuContainel">
+					<div class="accountMenu">
+						<span class="menu menuBg">일자</span>
+						<span class="menu menuBg">항목</span>
+						<span class="menu menuBg">적요</span>
+						<span class="menu menuBg">수입</span>
+						<span class="menu menuBg">지출</span>
+						<span class="menu menuBg">잔액</span>
+						<span class="menu menuBg">비고</span>
+					</div>
+					<div th:each="accountList : ${accountList}" class="accountMenu">
+						<a th:href="@{/main/modify-page(serial = ${accountList.accountNo})}">
+								<span th:text="${accountList.accountDate}" class="menu"></span>
+								<span th:text="${accountList.accountItem}" class="menu"></span>
+								<span th:text="${accountList.accountBriefs}" class="menu"></span>
+								<span th:text="${accountList.accountIncome}" class="menu"></span>
+								<span th:text="${accountList.accountExpenditure}" class="menu"></span>
+								<span th:text="${accountList.accountBalance}" class="menu"></span>
+								<span th:text="${accountList.accountNote}" class="menu"></span>
+						</a>	
+					</div>
+					<div class="buttonContainer">					
+						<th:block th:if="${accountPage.startPage > 1}">
+								<button id="firstPageButton" th:text="<<" th:value="1"></button>
+								<button id="previousButton" th:text="이전" th:value="${accountPage.nowPage-1}"></button>
+						</th:block>
+						
+						
+						<th:block th:each="pageButton : ${#numbers.sequence(accountPage.startPage,accountPage.endPage)}">
+							<button class="pageButton btn btn-primary" th:text="${pageButton}" th:value="${pageButton}" ></button>
+						</th:block>
+						
+						<th:block th:if="${accountPage.endPage < accountPage.totPage}">
+								<button id="lastPageButton" th:text=">>" th:value="${accountPage.totPage}"></button>
+								<button id="nextButton" th:text="다음" th:value="${accountPage.nowPage+1}"></button>			
+						</th:block>
+					</div>
+					<div class="total">
+						<span>총 수입 : [[${totAccount[totalAccountIncome]}]]</span>
+						<span>총 지출 : [[${totAccount[totalAccountExpenditure]}]]</span>
+						<span>현재 잔액 : [[${recentryBalance}]]원 </span>
+					</div>
+				</div>
+
+			</div>
+		<div class="homeButtonContanel">
+			<!-- 인서트 페이지로 이동 -->	
+			<div class="homeButton">
+				<form th:action="@{/main/produce-page}" method="get">
+					<button th:text="입력" type="submit" class="btn btn-primary"></button>
+				</form>
+			</div>	
+			
+			<!-- 로그아웃 버튼 -->
+			<div class="homeButton">
+				<form th:action="@{/logout}" method="post">
+					<button th:text="로그아웃" type="submit" class="btn btn-primary"></button>
+				</form>
+			</div>
+			<!-- 로그아웃 버튼 끝 -->
+		</div>
+	</div>
+	<script type="text/javascript" src="/js/home.js"></script>	
+</body>
+</html>

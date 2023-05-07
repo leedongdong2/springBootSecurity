@@ -1,0 +1,42 @@
+@charset "UTF-8";
+
+.title{display:inline-block;font-weight: bold;font-size: 20px;margin-left: 46.7%;margin-top: 1%;}
+.searchBar{text-align: right;margin-right: 7%;}
+.searchBarMenu{display: inline-block;margin-left: 20px;}
+.accountMenu{width:100%;}
+.menu { display:inline-block;width:13%;}
+.menuBg {background-color: #43f3ff}
+a {text-decoration: none;color:#000};
+a:hover {text-decoration: none;}
+.menuContainel{margin-top:2%;margin-left: 5%;}
+.total{margin-left:34%;margin-top: 1%;}
+.insertContainel{margin-left: 43%;}
+.homeButtonContanel{text-align: right;margin-right: 7%}
+.homeButton{display: inline-block;}
+.modifyContanel{margin-left: 43%;display: inline-block;}
+.modifyButtonContanel{display: inline-block;margin-left: 73%;}
+.deleteButtonContanel{display: inline-block;margin-top: 1%;margin-left: 73%;}
+.welcomeTitle{display: inline-block;z-index:1;position: absolute;margin-top:3.5%;margin-left:2%;}
+.welcomeTitle:hover {cursor:pointer;}
+.containel{position: relative;}
+.buttonContainer{margin-left: 44.5%}
+.deactivate{visibility: hidden;}
+li {list-style: none;}
+
+
+
+
+
+
+
+
+
+
+
+
+/* 어드민 */
+.adminTitle{font-weight: bold;padding-left: 11%;padding-bottom: 1%;padding-top: 1%}
+.adminMenuTitle span{background-color:  #43f3ff;display: inline-block; width:15%; text-align: center;}
+.adminMenu span{  display: inline-block; width:15%; text-align: center;}
+.adminButtonContainer {margin-left: 14%;margin-top:1%}
+.totUsers{margin-left: 11%;margin-top: 1%;}

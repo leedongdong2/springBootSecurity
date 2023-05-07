@@ -1,0 +1,70 @@
+ <!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel ="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<link rel ="stylesheet" href="/css/home.css">
+</head>
+<body>
+		<div>
+			<span class="title">수정하기</span>
+		</div>
+		<div class="modifyContanel">
+			<form th:action="@{/main/modify-page/1}"  th:method="put" id="modifyForm">
+				<input type="hidden" name="accountNo" th:value="${accountVo.accountNo}">
+					<div>
+						<label>날짜 : 											
+							<input type="date" pattern="\d{4}-\d{2}-\d{2}" name="accountDate" th:value="${accountVo.accountDate}"readonly/>			
+						</label>
+					</div>
+					<div>
+						<label>항목 : 
+							<input type="text" name="accountItem" th:value="${accountVo.accountItem}"/>
+						</label>	
+					</div>
+					<div>
+						<label>적요 :
+							<input type="text" name="accountBriefs" th:value="${accountVo.accountBriefs}"/>
+						</label>
+					</div>
+					<div>
+						<label>수입 : 
+							<input type="hidden" name="accountIncome" th:value="${accountVo.accountIncome}">
+							<input type="text" name="accountChangeIncome" th:value="${accountVo.accountIncome}"/>원
+						</label>
+					</div>
+					<div>
+						<label>지출 :
+							<input type="hidden" name="accountExpenditure" th:value="${accountVo.accountExpenditure}"> 
+							<input type="text" name="accountChangeExpenditure" th:value="${accountVo.accountExpenditure}"/>원
+						</label>
+					</div>
+					<div>
+						<label>비고 :
+							<input type="text" name="accountNote" th:value="${accountVo.accountNote}"/>
+						</label>
+					</div>
+					<div>
+						<label>잔액 :
+							<input type="text" th:value="${accountVo.accountBalance}" name="accountBalance" readOnly/> 
+						</label>
+					</div>
+					<div class="modifyButtonContanel">
+					<button th:text="수정" type="button" id="modifyButton" class="btn btn-primary"></button>
+					</div>
+			</form>
+			<div class="deleteButtonContanel">
+				<form  th:action="@{/main/modify-page/2}" th:method="delete" id="deleteForm">
+					<input type="hidden" name="accountNo" th:value="${accountVo.accountNo}">
+					<input type="hidden" name="accountBalance" th:value="${accountVo.accountBalance}">
+					<input type="hidden" name="accountIncome" th:value="${accountVo.accountIncome}">
+					<input type="hidden" name="accountExpenditure" th:value="${accountVo.accountExpenditure}"> 
+					<button type="button" th:text="삭제" id="deleteButton" class="btn btn-primary"></button>
+				</form>
+			</div>
+		</div>
+		
+<script type="text/javascript" src="/js/event.js"></script>		
+</body>
+</html>
